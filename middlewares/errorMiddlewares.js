@@ -47,5 +47,6 @@ export {
   CustomAPIError,
   errorHandler,
   notFoundHandler,
+  NotFoundError,
   UnauthenticatedError,
 };
