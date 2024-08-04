@@ -7,7 +7,9 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import swaggerUi from 'swagger-ui-express';
 import xss from 'xss-clean';
-import YAML from 'yamljs';
+import path from 'path';
+import fs from 'fs';
+import yaml from 'yamljs';
 
 import { protect } from './middlewares/authMiddleware.js';
 import {
@@ -22,7 +24,8 @@ import userRoutes from './routes/userRoutes.js';
 
 const app = express(); // create express app
 
-const swaggerDocument = YAML.load('./swagger.yaml'); // load swagger file
+const __dirname = path.resolve(); // get current directory
+const swaggerDocument = yaml.load(path.join(__dirname, 'swagger.yaml')); // load swagger file
 
 dotenv.config(); // load env variables
 
