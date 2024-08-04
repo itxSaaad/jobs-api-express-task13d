@@ -1,8 +1,15 @@
+import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
 import 'express-async-errors';
+import rateLimiter from 'express-rate-limit';
+import helmet from 'helmet';
 import morgan from 'morgan';
+import swaggerUi from 'swagger-ui-express';
+import xss from 'xss-clean';
+import YAML from 'yamljs';
 
+import { protect } from './middlewares/authMiddleware.js';
 import {
   errorHandler,
   notFoundHandler,
@@ -10,32 +17,44 @@ import {
 
 import connectDB from './config/db.js';
 
-import userRoutes from './routes/userRoutes.js';
 import jobsRoutes from './routes/jobsRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 
-const app = express();
+const app = express(); // create express app
 
-dotenv.config();
+const swaggerDocument = YAML.load('./swagger.yaml'); // load swagger file
+
+dotenv.config(); // load env variables
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const PORT = process.env.PORT || 3000;
 
-connectDB();
+connectDB(); // connect to database
 
-app.use(express.json());
+app.set('trust proxy', 1); // trust first proxy
+app.use(
+  rateLimiter({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+  })
+); // limit requests
+app.use(express.json()); // parse json body
+app.use(helmet()); // set security headers
+app.use(cors()); // enable cors
+app.use(xss()); // sanitize user input
 
 if (NODE_ENV === 'development') {
   app.use(morgan('dev'));
-}
+} // log requests
 
 app.get('/', (req, res) => {
-  res.send(
-    '<section><h1>Job Board API</h1><p>Welcome to the Job Board API</p><a href="/api/v1/users">Users</a><a href="/api/v1/jobs">Jobs</a></section > '
-  );
+  res.send('<h1>Jobs API</h1><a href="/api-docs">Documentation</a>');
 });
 
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
 app.use('/api/v1/users', userRoutes);
-app.use('/api/v1/jobs', jobsRoutes);
+app.use('/api/v1/jobs', protect, jobsRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);
