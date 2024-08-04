@@ -3,7 +3,7 @@ import { StatusCodes } from 'http-status-codes';
 import {
   BadRequestError,
   UnauthenticatedError,
-} from '../middlewares/errorMiddlewares';
+} from '../middlewares/errorMiddlewares.js';
 
 import User from '../models/userModel.js';
 
