@@ -5,10 +5,9 @@ import 'express-async-errors';
 import rateLimiter from 'express-rate-limit';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import path from 'path';
 import swaggerUi from 'swagger-ui-express';
 import xss from 'xss-clean';
-import path from 'path';
-import fs from 'fs';
 import yaml from 'yamljs';
 
 import { protect } from './middlewares/authMiddleware.js';
